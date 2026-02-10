@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/nad/:path*',
+        destination: 'https://api.nadapp.net/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

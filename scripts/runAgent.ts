@@ -1,4 +1,4 @@
-import { network } from "hardhat";
+import { ethers } from "hardhat";
 
 // Pyth Price IDs
 const ASSETS = [
@@ -13,20 +13,15 @@ const DURATIONS = [
   { label: "1 hour", seconds: 60 * 60 }
 ];
 
-const FEES = ["0.01", "0.05", "0.1"];
+const FEES = ["0.001", "0.002", "0.003"];
 
-const CONTRACT_ADDRESS = "0x354291588084bA8fB682a6414366e0E8552369CE";
+const CONTRACT_ADDRESS = "0xbdc4a80e6C197aD259194F197B25c8edD519434C";
 
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
 async function main() {
-  const { ethers } = await network.connect({
-    network: "monadTestnet",
-    chainType: "l1",
-  });
-
   const [signer] = await ethers.getSigners();
   console.log("🤖 Chaos Agent running as:", signer.address);
 

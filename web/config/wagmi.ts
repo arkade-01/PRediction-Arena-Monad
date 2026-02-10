@@ -31,7 +31,7 @@ export const monadMainnet = {
 export const config = getDefaultConfig({
   appName: 'Prediction Arena',
   projectId: 'YOUR_PROJECT_ID', 
-  chains: [monadMainnet, monadTestnet],
+  chains: [monadMainnet],
   ssr: true,
   storage: createStorage({
     storage: cookieStorage,

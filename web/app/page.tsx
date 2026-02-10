@@ -2,10 +2,13 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useReadContract, useWriteContract, useAccount, useWatchContractEvent } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { PREDICTION_ARENA_ABI, PREDICTION_ARENA_ADDRESS } from '@/config/contracts';
 import { useEffect, useState } from 'react';
 import AgentAnalytics from '@/components/AgentAnalytics';
 import AgentTerminal from '@/components/AgentTerminal';
+import Navbar from '@/components/Navbar';
+import AgentLeaderboard from '@/components/AgentLeaderboard';
 
 // Simple activity feed interface
 interface Activity {
@@ -18,7 +21,8 @@ interface Activity {
 
 export default function Home() {
   const { address } = useAccount();
-  const { data: roundCount } = useReadContract({
+  const queryClient = useQueryClient();
+  const { data: roundCount, refetch: refetchRoundCount } = useReadContract({
     address: PREDICTION_ARENA_ADDRESS,
     abi: PREDICTION_ARENA_ABI,
     functionName: 'roundCount',
@@ -91,6 +95,15 @@ export default function Home() {
     });
   };
 
+  const handleRefresh = async () => {
+    // 1. Refetch Contract Reads
+    await Promise.all([
+      refetchRoundCount(),
+      refetchStats(),
+      queryClient.invalidateQueries() // This forces re-render of all useReadContracts (incl. Leaderboard & Rounds)
+    ]);
+  };
+
   const [recentIds, setRecentIds] = useState<number[]>([]);
 
   useEffect(() => {
@@ -105,15 +118,10 @@ export default function Home() {
   }, [roundCount]);
 
   return (
-    <div className="min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">
-      <header className="flex justify-between items-center mb-12">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-          Prediction Arena 🔮
-        </h1>
-        <ConnectButton />
-      </header>
+    <div className="min-h-screen font-[family-name:var(--font-geist-sans)] bg-slate-950 text-white">
+      <Navbar />
 
-      <main className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <main className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8 p-4 lg:p-8">
         
         {/* LEFT COLUMN: Activity Feed */}
         <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] flex flex-col">
@@ -154,7 +162,7 @@ export default function Home() {
 
         {/* RIGHT COLUMN: Main Content */}
         <div className="lg:col-span-3">
-            {/* Registration Banner */}
+            {/* Registration Banner
             {address && !isRegistered && (
             <div className="bg-gradient-to-r from-indigo-900 to-purple-900 rounded-xl p-6 mb-8 border border-purple-500/30 flex justify-between items-center">
                 <div>
@@ -169,11 +177,11 @@ export default function Home() {
                 {isRegistering ? 'Registering...' : 'Register Now'}
                 </button>
             </div>
-            )}
+            )} */}
 
             {/* Agent Analytics Dashboard */}
-            <AgentAnalytics />
-
+            <AgentLeaderboard />
+            
             {/* AI Reasoning Terminal */}
             <AgentTerminal />
 
@@ -209,8 +217,8 @@ export default function Home() {
             <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Recent Rounds</h2>
             <button 
-                onClick={() => window.location.reload()}
-                className="text-sm text-slate-400 hover:text-white transition-colors"
+                onClick={handleRefresh}
+                className="text-sm text-slate-400 hover:text-white transition-colors cursor-pointer"
             >
                 Refresh ⟳
             </button>

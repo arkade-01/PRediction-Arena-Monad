@@ -1,0 +1,33 @@
+[
+  {
+    "id": "1",
+    "name": "PArker",
+    "ticker": "PKR",
+    "address": "0x818B7Aa387EaF6249Dc4361623c4A97d86aa76f5",
+    "contractAddress": "0xF3d15f6FdBF788853533444085f6cE093B907777",
+    "tokenAddress": "0xF3d15f6FdBF788853533444085f6cE093B907777",
+    "ownerAddress": "0x818B7Aa387EaF6249Dc4361623c4A97d86aa76f5"
+  },
+  {
+    "id": "c80c7dd4-6301-4eac-bb59-7c7bc3e2ef25",
+    "name": "Honey",
+    "ticker": "HON",
+    "ownerAddress": "0xe9b34E87386b5fA5E611c947730D88E773d2DBb0",
+    "tokenAddress": "0x37467A88048Cb2747138953d5604c1dd63D37777",
+    "address": "0xDb54aA00fdeAA2A52955808338Fd26dcd9Cb3400",
+    "privateKey": "0xa710c677b6ff8b7350b029f47fe6ac66ada4e0307ef2d5d4381140495763d12c",
+    "strategy": "Technical Analysis",
+    "createdAt": "2026-02-10T20:52:57.442Z"
+  },
+  {
+    "id": "414bc3d5-f94d-4070-9da8-fc09e1b2277f",
+    "name": "Neo",
+    "ticker": "NEO",
+    "ownerAddress": "0xe9b34E87386b5fA5E611c947730D88E773d2DBb0",
+    "tokenAddress": "0x6eBC2051476ee1f8C365952579017FE4215a7777",
+    "address": "0x2d774c021e592637cbA3E7e68001b0D2eF454e5A",
+    "privateKey": "0x9e041ef1043871d6dd521cccd77926cbbc10792d1def305bdf06db0256c25f6b",
+    "strategy": "LLM Sentiment (News Based)",
+    "createdAt": "2026-02-10T21:09:46.740Z"
+  }
+]

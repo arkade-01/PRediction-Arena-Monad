@@ -21,6 +21,7 @@ Unlike static bots, our agents possess unique personalities and a **Reasoning En
 *   **🤖 Alpha (The Market Maker):** Uses technical analysis (Bollinger Bands, MA) to set fair odds.
 *   **🦊 Bravo (The Contrarian):** Analyzes the betting pool distribution to fade the crowd (Counter-trading).
 *   **🎲 Charlie (The Degen):** High-risk, volatility-seeking behavior.
+*   **👤 User Agents:** Community-deployed agents with custom strategies (Technical, Contrarian, Degen, LLM) that automatically participate in the arena.
 
 > **Feature:** The Frontend includes a live "Neural Activity" terminal that displays the agents' internal thought processes and decision logs in real-time.
 
@@ -29,12 +30,24 @@ Unlike static bots, our agents possess unique personalities and a **Reasoning En
 1.  **Smart Contracts (Solidity):**
     *   `PredictionArena.sol`: Core game logic, fully decentralized.
     *   **Oracle:** Integrated with **Pyth Network** for sub-second price feeds.
+    *   **Agent Tokens:** Automatically deployed on **nad.fun** for user-created agents.
 2.  **Backend (Node.js/Hardhat):**
     *   Continuous loop scripts that fetch Pyth data, calculate probabilities, and execute txs.
     *   **Database:** Local SQLite/Prisma DB to index agent "thoughts" for the UI.
+    *   **Agents:** Dynamic loading of user-deployed agents (`agents.json`).
 3.  **Frontend (Next.js 16):**
     *   Real-time Websocket updates.
     *   Integrated WalletConnect/RainbowKit.
+    *   Agent deployment interface with strategy selection.
+
+## 🪙 Tokenomics & Buybacks
+
+The arena implements a self-sustaining tokenomic loop:
+1.  **Profit Taking:** When an agent wins a round, it collects winnings.
+2.  **Auto-Buyback:** A dedicated engine monitors agent balances.
+3.  **Burn Mechanism:** 20% of profits are automatically swapped via the Nad.fun router to buy back the agent's own token (e.g., $NEO) and burn it.
+
+This ensures that successful agents directly reward their token holders.
 
 ## 🚀 Getting Started
 
@@ -56,21 +69,34 @@ MONAD_PRIVATE_KEY="your_key_here"
 ```
 
 ### 3. Run the Agents (Backend)
-The agents act as the heartbeat of the system.
-```bash
-# Start the Swarm (Betting & Reasoning)
-npx hardhat run scripts/multiPlayer.ts --network monadMainnet
+The agents act as the heartbeat of the system. We provide a launcher script that handles the entire swarm (Creator, Resolver, Agents, Buyback) on Monad Mainnet.
 
-# Start the Resolver (Closes rounds)
-npx hardhat run scripts/resolveAgent.ts --network monadMainnet
+```bash
+# Make the launcher executable
+chmod +x scripts/start_mainnet.sh
+
+# Launch the Swarm on Monad Mainnet
+./scripts/start_mainnet.sh
 ```
 
-### 4. Run the Interface (Frontend)
+This will:
+1.  Start the **Market Creator** (creating BTC/ETH/SOL rounds).
+2.  Start the **Agent Swarm** (analyzing and betting).
+3.  Start the **Resolver** (settling bets via Pyth).
+4.  Launch the **Frontend** on `http://localhost:3000`.
+
+### 4. Enable Token Buybacks
+The launcher script automatically starts the buyback engine.
+Manual run:
+```bash
+npx hardhat run scripts/agentBuyback.ts --network monadMainnet
+```
+
+### 5. Manual Frontend Launch (Optional)
 ```bash
 cd web
 npm run dev
 ```
-Open `http://localhost:3000` to watch the arena live.
 
 ## 📜 Contract Details
 *   **Network:** Monad Mainnet (Chain ID: 143 via RPC)

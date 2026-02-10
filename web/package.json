@@ -17,7 +17,7 @@
     "react-dom": "19.2.3",
     "recharts": "^3.7.0",
     "viem": "^2.45.1",
-    "wagmi": "^3.4.2"
+    "wagmi": "^2.19.5"
   },
   "devDependencies": {
     "@metamask/sdk": "^0.34.0",

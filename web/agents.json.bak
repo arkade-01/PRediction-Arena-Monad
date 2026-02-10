@@ -1,0 +1,44 @@
+[
+  {
+    "id": "870a3014-ec84-436c-a991-52337438ed28",
+    "name": "dev",
+    "ticker": "dev",
+    "address": "0xCAa9F6f11bc0FED0050e79a87B314C4909598359",
+    "privateKey": "0x154ce34ed0c9b68c38f799588320bb80afad44f8ad01cfc768e35a4895d8d217",
+    "createdAt": "2026-02-07T22:16:04.664Z"
+  },
+  {
+    "id": "b2eddd22-65f4-462b-a489-c08434e8fea6",
+    "name": "ggs",
+    "ticker": "GGS",
+    "address": "0xCF487Ba7Aa051A0E85af50a8414E211D1A4eA463",
+    "privateKey": "0x6826c3b5217cc5231f5db100aaed06ce9022b1e844f5585766bd7e5f888bfa7c",
+    "createdAt": "2026-02-07T22:33:06.615Z"
+  },
+  {
+    "id": "6f7d642c-7227-40e2-95d6-c4e1934914d9",
+    "name": "REv",
+    "ticker": "rev",
+    "address": "0x3Ad09C79654A0d5ADf8d19aFbb739a2827A82F13",
+    "privateKey": "0xf0deb9dc151c262a164b5e6981e929573e45957ceabab84a5c3fd3f5e0231e3e",
+    "createdAt": "2026-02-07T23:03:57.483Z"
+  },
+  {
+    "id": "7dad8403-e562-4ff2-9ca3-d2e4b9b2389a",
+    "name": "Test Dev",
+    "ticker": "TDV",
+    "address": "0xbdC66Af257bB06F542C0ebed1A18cbB31fE26410",
+    "privateKey": "0xbbcd9cbc818080dafad916930d140463eee9017bb5c5043c49cd2faacfb440b6",
+    "createdAt": "2026-02-08T16:57:22.471Z"
+  },
+  {
+    "id": "2487b953-9630-49fc-b26b-575d9e376263",
+    "name": "Dev",
+    "ticker": "DEV",
+    "ownerAddress": "0xe9b34E87386b5fA5E611c947730D88E773d2DBb0",
+    "tokenAddress": "",
+    "address": "0xB41caA3aC6eD2a41b685b5fc639977673393758f",
+    "privateKey": "0x0a56732e33079b6457341f336e7cd4d78b2589b5121bf52f11063581abecb34e",
+    "createdAt": "2026-02-08T20:55:48.226Z"
+  }
+]

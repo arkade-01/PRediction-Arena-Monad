@@ -13,24 +13,54 @@ const __dirname = path.dirname(__filename);
 const CONTRACT_ADDRESS = "0xbdc4a80e6C197aD259194F197B25c8edD519434C";
 const PYTH_HERMES_URL = "https://hermes.pyth.network/v2/updates/price/latest";
 
-// Define our squad of agents
-const PLAYERS = [
-  // The "Market Maker" (likely the deployer/funder)
+// Hardcoded fallback agents (if agents.json is empty)
+const FALLBACK_PLAYERS = [
   { 
     name: "🤖 Alpha", 
     key: "0x11444aa2db17883d3f84ceda36d0217342ad780f3a8c3f48b561dd5a4c4cf88f" 
   },
-  // The "Player 1" we saw earlier
   { 
     name: "🦊 Bravo", 
     key: "0xae167ccfca811b0c1d418e3329f2e2340e3faf524d4b0ac22ea2c974969dbea7" 
   },
-  // Additional players (ensure these have MON tokens!)
   { 
     name: "🎲 Charlie", 
     key: "0xb8f3d7fe3891e62e58f4a21d9c8a9b7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a" 
   }
 ];
+
+// Load agents from agents.json (user-deployed agents)
+function loadAgents() {
+  const agentsFile = path.join(__dirname, '../web/agents.json');
+  console.log(`📂 Loading agents from: ${agentsFile}`);
+  
+  try {
+    if (fs.existsSync(agentsFile)) {
+      const data = JSON.parse(fs.readFileSync(agentsFile, 'utf8'));
+      
+      // Convert agents.json entries to PLAYERS format
+      const dynamicAgents = data
+        .map((agent: any) => ({
+          name: agent.name,
+          key: agent.privateKey || process.env.MONAD_PRIVATE_KEY, // Fallback to env key
+          strategy: agent.strategy || "Technical Analysis"
+        }));
+      
+      if (dynamicAgents.length > 0) {
+        console.log(`📂 Loaded ${dynamicAgents.length} agents from agents.json`);
+        return dynamicAgents; // Only user agents
+      }
+    }
+  } catch (e) {
+    console.warn(`⚠️ Could not load agents.json: ${(e as any).message}`);
+  }
+  
+  // Fallback to hardcoded
+  console.log("📂 No agents in agents.json. Waiting for user agents...");
+  return []; // Return empty array instead of FALLBACK_PLAYERS
+}
+
+const PLAYERS = loadAgents();
 
 const ABI = [
   "function roundCount() external view returns (uint256)",
@@ -63,7 +93,7 @@ async function getPythPrice(priceId: string): Promise<number | null> {
       return Number(data.price.price); 
     }
   } catch (e) {
-    console.error("   ⚠️ Failed to fetch price:", (e as any).message);
+    console.error("   ⚠️ Failed to fetch price:", (e as any).message, (e as any).response?.data);
   }
   return null;
 }
@@ -99,7 +129,7 @@ async function logThought(agentName: string, message: string, sentiment: string 
 async function main() {
   console.log("🚀 Starting Simple Intelligent Agent Swarm...");
   
-  const provider = new JsonRpcProvider("https://rpc.monad.xyz"); // Mainnet RPC
+  const provider = new JsonRpcProvider("https://rpc.monad.xyz", undefined, { staticNetwork: true, batchMaxCount: 1 });
   
   // We use a read-only instance first to check rounds
   const readOnlyArena = new Contract(CONTRACT_ADDRESS, ABI, provider);
@@ -113,18 +143,38 @@ async function main() {
   for (const player of PLAYERS) {
     if (!player.key) continue;
     
-    const wallet = new Wallet(player.key, provider);
+    // Safety check: Don't process if user didn't fund the agent
+    if (player.key.length !== 66 && !player.key.startsWith('0x')) {
+       // Maybe it's a raw key without 0x
+       player.key = '0x' + player.key;
+    }
+    
+    let wallet;
+    try {
+        wallet = new Wallet(player.key, provider);
+    } catch (e) {
+        console.log(`   ❌ Invalid key for ${player.name}, skipping.`);
+        continue;
+    }
+
     const agentContract = new Contract(CONTRACT_ADDRESS, ABI, wallet);
     
     console.log(`\n👤 Agent: ${player.name} (${wallet.address.slice(0,6)}...${wallet.address.slice(-4)})`);
     
     // Check Funds
-    const balance = await provider.getBalance(wallet.address);
+    let balance;
+    try {
+      balance = await provider.getBalance(wallet.address);
+    } catch (e) {
+       console.log(`   ⚠️ Failed to check balance: ${(e as any).message}`);
+       continue;
+    }
+
     const balanceEth = ethers.formatEther(balance);
     console.log(`   💰 Balance: ${Number(balanceEth).toFixed(4)} MON`);
     
     if (balance === 0n) {
-      console.log("   ❌ No funds, skipping.");
+      console.log("   ❌ No funds (0 MON), skipping. Please fund this agent!");
       continue;
     }
 
@@ -148,6 +198,7 @@ async function main() {
     // 3. Scan for Active Rounds
     // We only look at the last 10 rounds to save time
     const startRound = Number(roundCount) > 10 ? Number(roundCount) - 9 : 1;
+    console.log(`   🔎 Scanning rounds ${startRound} to ${roundCount}...`);
     
     for (let i = Number(roundCount); i >= startRound; i--) {
       try {
@@ -195,10 +246,16 @@ async function main() {
         let predictedPrice: bigint;
 
         if (currentPriceRaw) {
+          // STRATEGY DETECTION: Check strategy field or fallback to name
+          const agentStrategy = (player as any).strategy || 
+                               (player.name.includes("Bravo") ? "Contrarian (Fade the Crowd)" : 
+                                player.name.includes("Charlie") ? "Degen (High Volatility / Random)" : 
+                                "Technical Analysis (Trend Following)");
+          
           // STRATEGY VARIATION BASED ON AGENT PERSONALITY
           
-          if (player.name.includes("Bravo")) {
-             // 🦊 BRAVO: The Contrarian (Opponent Aware)
+          if (agentStrategy.includes("Contrarian") || player.name.includes("Bravo")) {
+             // 🦊 CONTRARIAN: Fade the Crowd (Opponent Aware)
              // Check what everyone else is doing
              const roundPlayers = await readOnlyArena.getRoundPlayers(i);
              let bullishBets = 0;
@@ -212,45 +269,51 @@ async function main() {
                 else bearishBets++;
              }
 
-             console.log(`      🧠 Bravo Thinking: "I see ${bullishBets} bulls and ${bearishBets} bears in the pool."`);
+             console.log(`      🧠 ${player.name} Thinking: "I see ${bullishBets} bulls and ${bearishBets} bears in the pool."`);
              
              // Fade the crowd if significant imbalance
              if (bullishBets > bearishBets * 1.5) {
-                await logThought("🦊 Bravo", "The herd is blindly long. I smell a correction.", "bearish");
+                await logThought(player.name, "The herd is blindly long. I smell a correction.", "bearish");
                 predictedPrice = BigInt(Math.floor(currentPriceRaw * 0.99)); // Bet DOWN
              } else if (bearishBets > bullishBets * 1.5) {
-                await logThought("🦊 Bravo", "Fear is too high. Time to buy the dip.", "bullish");
+                await logThought(player.name, "Fear is too high. Time to buy the dip.", "bullish");
                 predictedPrice = BigInt(Math.floor(currentPriceRaw * 1.01)); // Bet UP
              } else {
                 // Neutral market, follow trend
-                await logThought("🦊 Bravo", "Market is balanced. Following the slight uptrend.", "neutral");
+                await logThought(player.name, "Market is balanced. Following the slight uptrend.", "neutral");
                 predictedPrice = BigInt(Math.floor(currentPriceRaw * 1.005)); 
              }
 
-          } else if (player.name.includes("Charlie")) {
-             // 🎲 CHARLIE: High Volatility (Risk Taker)
+          } else if (agentStrategy.includes("Degen") || agentStrategy.includes("Random") || player.name.includes("Charlie")) {
+             // 🎲 DEGEN: High Volatility (Risk Taker)
              // Bets on extreme moves
              const isPumping = Math.random() > 0.5;
              const variance = 0.05; // 5% move prediction
              const factor = isPumping ? (1 + variance) : (1 - variance);
              predictedPrice = BigInt(Math.floor(currentPriceRaw * factor));
              
-             // console.log(`      🧠 Charlie Thinking: "Volatility is life."`);
              if (isPumping) {
-               await logThought("🎲 Charlie", "YOLO! To the moon! 🚀", "chaos");
+               await logThought(player.name, "YOLO! To the moon! 🚀", "chaos");
              } else {
-               await logThought("🎲 Charlie", "It's going to zero! 📉", "bearish");
+               await logThought(player.name, "It's going to zero! 📉", "bearish");
              }
 
+          } else if (agentStrategy.includes("Sentiment") || agentStrategy.includes("LLM")) {
+             // 🤖 LLM SENTIMENT: News-based (placeholder for now, uses technical + noise)
+             const variance = 0.01; 
+             const randomFactor = 1 + (Math.random() * variance * 2 - variance); 
+             predictedPrice = BigInt(Math.floor(currentPriceRaw * randomFactor));
+             
+             await logThought(player.name, "Analyzing market sentiment and recent news... slight bullish bias.", "neutral");
+
           } else {
-             // 🤖 ALPHA: Conservative / Technical
+             // 🤖 TECHNICAL ANALYSIS: Conservative / Trend Following
              // Standard +/- 0.5%
              const variance = 0.005; 
              const randomFactor = 1 + (Math.random() * variance * 2 - variance); 
              predictedPrice = BigInt(Math.floor(currentPriceRaw * randomFactor));
              
-             // console.log(`      🧠 Alpha Thinking: "Analyzing technicals..."`);
-             await logThought("🤖 Alpha", "Bollinger bands tightening. Expecting standard deviation move.", "neutral");
+             await logThought(player.name, "Bollinger bands tightening. Expecting standard deviation move.", "neutral");
           }
 
         } else {

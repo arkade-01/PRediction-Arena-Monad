@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+// Force dynamic rendering (don't pre-render during build)
+export const dynamic = 'force-dynamic';
+
 // GET /api/agents - List all agents (with private keys for backend scripts)
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

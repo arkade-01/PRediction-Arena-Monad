@@ -15,10 +15,12 @@ interface Agent {
   ticker: string;
   address: string;
   ownerAddress?: string;
-  tokenAddress: string;
-  wins: number;
-  losses: number;
-  totalWagered: string;
+  tokenAddress?: string | null;
+  strategy?: string;
+  createdAt?: Date;
+  wins?: number;
+  losses?: number;
+  totalWagered?: string;
 }
 
 export default function AgentsPage() {

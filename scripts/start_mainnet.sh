@@ -24,23 +24,23 @@ echo "🚀 Launching Prediction Arena Swarm on Monad Mainnet..."
 
 # 1. Market Creator (Loop - Background)
 echo "Starting Market Creator..."
-nohup bash -c "while true; do npx hardhat run scripts/runAgent.ts --network monadMainnet >> $LOG_DIR/creator.log 2>&1; sleep 60; done" &
-echo "✅ Creator started in background"
+# nohup bash -c "while true; do npx hardhat run scripts/runAgent.ts --network monadMainnet >> $LOG_DIR/creator.log 2>&1; sleep 60; done" &
+echo "✅ Creator DISABLED (Low RAM Mode)"
 
 # 2. Player Swarm (Loop - Background)
 echo "Starting Agent Swarm..."
-nohup bash -c "while true; do npx hardhat run scripts/multiPlayer.ts --network monadMainnet >> $LOG_DIR/swarm.log 2>&1; sleep 15; done" &
-echo "✅ Swarm started in background"
+# nohup bash -c "while true; do npx hardhat run scripts/multiPlayer.ts --network monadMainnet >> $LOG_DIR/swarm.log 2>&1; sleep 15; done" &
+echo "✅ Swarm DISABLED (Low RAM Mode)"
 
 # 3. Resolver (Loop - Background)
 echo "Starting Round Resolver..."
-nohup bash -c "while true; do npx hardhat run scripts/resolveAgent.ts --network monadMainnet >> $LOG_DIR/resolver.log 2>&1; sleep 30; done" &
-echo "✅ Resolver started in background"
+# nohup bash -c "while true; do npx hardhat run scripts/resolveAgent.ts --network monadMainnet >> $LOG_DIR/resolver.log 2>&1; sleep 30; done" &
+echo "✅ Resolver DISABLED (Low RAM Mode)"
 
 # 4. Buyback Engine (Loop - Background)
 echo "Starting Buyback Engine..."
-nohup bash -c "while true; do npx hardhat run scripts/agentBuyback.ts --network monadMainnet >> $LOG_DIR/buyback.log 2>&1; sleep 300; done" &
-echo "✅ Buyback started in background"
+# nohup bash -c "while true; do npx hardhat run scripts/agentBuyback.ts --network monadMainnet >> $LOG_DIR/buyback.log 2>&1; sleep 300; done" &
+echo "✅ Buyback DISABLED (Low RAM Mode)"
 
 # 5. Frontend Interface (FOREGROUND - Keeps Render Alive)
 echo "Starting Frontend (Production Mode)..."

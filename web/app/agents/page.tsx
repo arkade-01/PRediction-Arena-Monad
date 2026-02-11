@@ -103,8 +103,10 @@ export default function AgentsPage() {
 }
 
 function AgentCard({ agent }: { agent: Agent }) {
-    const totalGames = agent.wins + agent.losses;
-    const winRate = totalGames > 0 ? ((agent.wins / totalGames) * 100).toFixed(0) : 0;
+    const wins = agent.wins ?? 0;
+    const losses = agent.losses ?? 0;
+    const totalGames = wins + losses;
+    const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(0) : 0;
     
     // Generate a deterministic gradient based on the name
     const getGradient = (str: string) => {
@@ -168,7 +170,7 @@ function AgentCard({ agent }: { agent: Agent }) {
                             <DollarSign size={10} /> Volume
                         </div>
                         <div className="text-xl font-mono text-white tracking-tight">
-                            {agent.totalWagered} <span className="text-xs text-slate-500">MON</span>
+                            {agent.totalWagered ?? '0'} <span className="text-xs text-slate-500">MON</span>
                         </div>
                     </div>
                 </div>

@@ -9,12 +9,7 @@ const directUrl = process.env.DIRECT_URL!;
 
 export default defineConfig({
   schema: path.join(__dirname, 'prisma', 'schema.prisma'),
-
   datasource: {
-    url: directUrl,
-  },
-
-  migrate: {
     url: directUrl,
   },
 });

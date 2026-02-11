@@ -31,6 +31,7 @@ export default function AgentLeaderboard() {
   }));
 
   const { data: stats } = useReadContracts({
+    // @ts-ignore
     contracts,
     query: {
         refetchInterval: 5000

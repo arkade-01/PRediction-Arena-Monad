@@ -29,38 +29,41 @@ const FALLBACK_PLAYERS = [
   }
 ];
 
-// Load agents from agents.json (user-deployed agents)
-function loadAgents() {
-  const agentsFile = path.join(__dirname, '../web/agents.json');
-  console.log(`📂 Loading agents from: ${agentsFile}`);
+// API URL for fetching agents (set in env or default to localhost)
+const API_URL = process.env.API_URL || "http://localhost:3000";
+const BACKEND_SECRET = process.env.BACKEND_SECRET || "pred-arena-backend-2026";
+
+// Load agents from API (Supabase-backed)
+async function loadAgents() {
+  console.log(`📂 Loading agents from: ${API_URL}/api/agents`);
   
   try {
-    if (fs.existsSync(agentsFile)) {
-      const data = JSON.parse(fs.readFileSync(agentsFile, 'utf8'));
+    const response = await axios.get(`${API_URL}/api/agents?keys=true&secret=${BACKEND_SECRET}`, {
+      timeout: 10000
+    });
+    
+    const data = response.data;
+    
+    if (Array.isArray(data) && data.length > 0) {
+      const dynamicAgents = data.map((agent: any) => ({
+        name: agent.name,
+        key: agent.privateKey || process.env.MONAD_PRIVATE_KEY,
+        strategy: agent.strategy || "Technical Analysis"
+      }));
       
-      // Convert agents.json entries to PLAYERS format
-      const dynamicAgents = data
-        .map((agent: any) => ({
-          name: agent.name,
-          key: agent.privateKey || process.env.MONAD_PRIVATE_KEY, // Fallback to env key
-          strategy: agent.strategy || "Technical Analysis"
-        }));
-      
-      if (dynamicAgents.length > 0) {
-        console.log(`📂 Loaded ${dynamicAgents.length} agents from agents.json`);
-        return dynamicAgents; // Only user agents
-      }
+      console.log(`📂 Loaded ${dynamicAgents.length} agents from API`);
+      return dynamicAgents;
     }
   } catch (e) {
-    console.warn(`⚠️ Could not load agents.json: ${(e as any).message}`);
+    console.warn(`⚠️ Could not load agents from API: ${(e as any).message}`);
   }
   
-  // Fallback to hardcoded
-  console.log("📂 No agents in agents.json. Waiting for user agents...");
-  return []; // Return empty array instead of FALLBACK_PLAYERS
+  console.log("📂 No agents found. Waiting for user agents...");
+  return [];
 }
 
-const PLAYERS = loadAgents();
+// We'll load players in main() since loadAgents is now async
+let PLAYERS: any[] = [];
 
 const ABI = [
   "function roundCount() external view returns (uint256)",
@@ -127,6 +130,14 @@ async function logThought(agentName: string, message: string, sentiment: string 
 // ----------------------------------------------------------------------------
 
 async function main() {
+  // Load agents from API
+  PLAYERS = await loadAgents();
+  
+  if (PLAYERS.length === 0) {
+    console.log("⚠️ No agents to run. Exiting.");
+    return;
+  }
+  
   console.log("🚀 Starting Simple Intelligent Agent Swarm...");
   
   const provider = new JsonRpcProvider("https://rpc.monad.xyz", undefined, { staticNetwork: true, batchMaxCount: 1 });

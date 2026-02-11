@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Agent {
+  id           String   @id @default(uuid())
+  name         String
+  ticker       String
+  address      String   @unique
+  privateKey   String
+  ownerAddress String
+  tokenAddress String?
+  strategy     String   @default("Technical Analysis")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

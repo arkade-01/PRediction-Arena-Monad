@@ -24,7 +24,7 @@ echo "🚀 Launching Prediction Arena Swarm on Monad Mainnet..."
 
 # 1. Market Creator (Loop - Background)
 echo "Starting Market Creator..."
-
+nohup bash -c "while true; do npx hardhat run scripts/runAgent.ts --network monadMainnet >> $LOG_DIR/creator.log 2>&1; sleep 120; done" &
 
 # 2. Player Swarm (Loop - Background)
 echo "Starting Agent Swarm..."

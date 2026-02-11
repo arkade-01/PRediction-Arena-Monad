@@ -9,10 +9,13 @@ interface Agent {
   name: string;
   ticker: string;
   address: string;
-  tokenAddress: string;
-  wins: number;
-  losses: number;
-  totalWagered: string;
+  ownerAddress?: string;
+  tokenAddress?: string | null;
+  strategy?: string;
+  createdAt?: Date;
+  wins?: number;
+  losses?: number;
+  totalWagered?: string;
 }
 
 export default function AgentLeaderboard() {
@@ -47,7 +50,7 @@ export default function AgentLeaderboard() {
       losses: stat ? Number(stat.losses) : 0,
       totalWagered: stat ? (Number(stat.totalWagered) / 1e18).toFixed(2) : "0"
     };
-  }).sort((a, b) => b.wins - a.wins);
+  }).sort((a, b) => (b.wins ?? 0) - (a.wins ?? 0));
 
   return (
     <div className="bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-6 mb-8 overflow-hidden relative">
@@ -79,8 +82,10 @@ export default function AgentLeaderboard() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                     {enrichedAgents.map((agent, i) => {
-                        const totalGames = agent.wins + agent.losses;
-                        const winRate = totalGames > 0 ? ((agent.wins / totalGames) * 100).toFixed(0) : 0;
+                        const wins = agent.wins ?? 0;
+                        const losses = agent.losses ?? 0;
+                        const totalGames = wins + losses;
+                        const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(0) : 0;
                         
                         return (
                             <tr key={agent.id} className="group hover:bg-white/5 transition-colors">
@@ -111,7 +116,7 @@ export default function AgentLeaderboard() {
                                     <div className="flex flex-col gap-2 max-w-[140px]">
                                         <div className="flex items-center justify-between text-xs">
                                             <span className="text-white font-bold">{winRate}% Win</span>
-                                            <span className="text-slate-500">{agent.wins}W - {agent.losses}L</span>
+                                            <span className="text-slate-500">{wins}W - {losses}L</span>
                                         </div>
                                         <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                                             <div 
@@ -122,7 +127,7 @@ export default function AgentLeaderboard() {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <div className="font-mono text-white text-base">{agent.totalWagered}</div>
+                                    <div className="font-mono text-white text-base">{agent.totalWagered ?? '0'}</div>
                                     <div className="text-xs text-slate-500">MON</div>
                                 </td>
                                 <td className="px-6 py-4 text-right">

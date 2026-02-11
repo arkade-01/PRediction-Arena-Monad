@@ -8,7 +8,6 @@ dotenv.config();
 const directUrl = process.env.DIRECT_URL!;
 
 export default defineConfig({
-  earlyAccess: true,
   schema: path.join(__dirname, 'prisma', 'schema.prisma'),
 
   datasource: {

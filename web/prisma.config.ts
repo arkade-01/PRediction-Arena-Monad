@@ -1,7 +1,10 @@
 import path from 'node:path';
 import { defineConfig } from 'prisma/config';
+import { config } from 'dotenv';
 
-// Render injects env vars directly, no need for dotenv
+// Load .env file for local development and builds
+config({ path: path.join(__dirname, '.env') });
+
 const directUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
 if (!directUrl) {

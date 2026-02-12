@@ -1,10 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
-import dns from 'dns';
-
-// Force IPv4 to avoid ENETUNREACH on IPv6-only hosts
-dns.setDefaultResultOrder('ipv4first');
 
 declare global {
   // eslint-disable-next-line no-var
@@ -12,17 +6,14 @@ declare global {
 }
 
 const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL;
+  const accelerateUrl = process.env.DATABASE_URL;
   
-  if (!connectionString) {
+  if (!accelerateUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaPg(pool);
-  
   return new PrismaClient({
-    adapter,
+    accelerateUrl,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 };

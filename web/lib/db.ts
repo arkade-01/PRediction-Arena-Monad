@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import dns from 'dns';
+
+// Force IPv4 to avoid ENETUNREACH on IPv6-only hosts
+dns.setDefaultResultOrder('ipv4first');
 
 declare global {
   // eslint-disable-next-line no-var

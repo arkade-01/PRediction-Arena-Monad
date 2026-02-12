@@ -1,6 +1,7 @@
 {
   "name": "predagent",
   "version": "1.0.0",
+  "type": "module",
   "description": "A prediction game contract for monad ",
   "main": "index.js",
   "scripts": {
